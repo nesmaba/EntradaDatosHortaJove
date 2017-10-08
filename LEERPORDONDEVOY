@@ -1,0 +1,4 @@
+VOY POR EL ARCHIVO Login.php por la línea 206, falta hacer el método registrarAcceso
+habrá que registrar el acceso en la BD. Crear Tabla Accesos con IP, Hora, Usuario en la BD.
+
+Seguir leyendo http://www.gitmedio.com/gitmedio/codigo-en-php-y-mysql-sistema-de-autenticacion/
