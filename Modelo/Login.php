@@ -19,16 +19,18 @@ class Login{
     private $pass="";
     private $mensaje="";
        
-    private static $datosConexion=null;
-    private static $db=null;
+    static $datosConexion;
+    static $db=null;
        
     /**
      * [constructor recibe argumentos]
      * @param [type] $mail    [ingresar correo]
      * @param [type] $pass [Ingresar contraseña]
      */
-    function __construct($mail,$pass){
-        $this->mail_=$mail;
+    function __construct($user,$pass){
+        self::$datosConexion= new DatosConexion();
+        // self::$logueado=false;
+        $this->user=$user;
         $this->pass=$pass;
     }
 
@@ -42,31 +44,26 @@ class Login{
         //metodos devueltos
         if($this->validarUser()==false){
             $this->mensaje=$this->mensaje;	
-            $this->mostrarMsg();
+            //$this->mostrarMsg();
         }else{
-            if($this->passwordUsr()==false){
+            if($this->validarPasswordUser()==false){
                 $this->mensaje=$this->mensaje;	
-                $this->mostrarMsg();
+                //$this->mostrarMsg();
             }else{
-                //si el logueo es correcto hace la redireccion
-                        if (!empty($_SERVER['HTTPS']) && ('on' == $_SERVER['HTTPS'])) {
-                                $uri = 'https://';
-                        }else{
-                                $uri = 'http://';
-                        }
-                    $uri .= $_SERVER['HTTP_HOST'];
-
-                    //Aqui modificar si el pag de aministracion esta 
-                    //en un subdirectorio
-                    // "<script type=\"text/javascript\">
-                        // window.location=\"".$uri."/wp-admin/admin.php\";
-                        // </script>";
-
-                        echo    "<script type=\"text/javascript\">
-                                   window.location=\"".$uri."/admin.php\";
-                                  </script>";
-
-                } 
+            //si el logueo es correcto hace la redireccion
+                if (!empty($_SERVER['HTTPS']) && ('on' == $_SERVER['HTTPS'])) {
+                        $uri = 'https://';
+                }else{
+                        $uri = 'http://';
+                }
+                if($_SESSION['logueado']){
+                 $uri .= $_SERVER['HTTP_HOST'];
+                echo    "<script type=\"text/javascript\">
+                               window.location=\"".$uri."/EntradaDatosHortaJove/insertar_datos.php\";
+                              </script>";
+   
+                }
+            } 
         }
     }
 
@@ -77,49 +74,68 @@ class Login{
      */
     private function validarUser(){
          $retornar=false;
+         /* LO SIGUIENTE SERÍA SI INTRODUJÉRAMOS UN EMAIL, PERO VAMOS A HACER CON NOMBRE DE USUARIO
          $mailfilter =filter_var($this->mail,FILTER_VALIDATE_EMAIL); //filtramos el correo
          //Validamos el formato  de correo electronico utilizando expresiones regulares
          if(preg_match("/[a-zAZ0-9\_\-]+\@[a-zA-Z0-9]+\.[a-zA-Z0-9]/", $mailfilter )==true){
             //intanciando de las clases
-            if(parent::$datosConexion==null){
-                parent::$datosConexion=new DatosConexion();
+            if(self::$datosConexion==null){
+                self::$datosConexion=new DatosConexion();
             }
-            if(parent::$db==null){
-                parent::$db=new PDO('mysql:host='.parent::$datosConexion->host()
-                        .';port=3306;dbname='.parent::$datosConexion->dbName(),
-                        parent::$datosConexion->usuario(), parent::$datosConexion->password());
+          * 
+          */
+         
+         //var_dump(self::$datosConexion);
+            if(self::$db==null){
+                $dsn= "mysql:host=".self::$datosConexion->host().";port=3306;dbname=".self::$datosConexion->dbName();
+                
+                self::$db=new PDO($dsn,
+                        self::$datosConexion->usuario(), 
+                        self::$datosConexion->password());
+                self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             }
+            //var_dump(self::$datosConexion->host());
             //Determinamos si la conexion a la bd es correcto.
-            if(parent::$db==null){
+            if(self::$db==null){
                 $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> Servidor de datos no econtrado, vuelva a intentar mas tarde. </div>';
             }else{
                 //consulta SQL para vereficar si existe tal correo del
                 //usario que introdujo 
-                $query= parent::$db->prepare("SELECT usuarios.Email
+                $query= self::$db->prepare("SELECT usuarios.Email
                                 FROM
                                 usuarios
-                                WHERE usuarios.Email=':mail';");
-
-                $query->bindParam(':mail', $mailfilter);
+                                WHERE usuarios.User=':user';");
+                $stm=
+                $query->bindParam(':user', $this->user);
 
                 $respuesta = $query->execute();
+                
                 //Aquí determinamos con la instrucción if
                 //la consulta generada, si mayor a cero
                 //retornamos el valor verdadero
                 //por el contrario mensaje de error
+                                
                 if($respuesta){
                     //asignamos el mail sanitizado  al campo Mail_
-                    $this->mail=$mailfilter;
-                    $retornar=true;// se retorna un valor verdadero	
+                    //$this->mail=$mailfilter;
+                    // Parse returned data, and displays them
+                    
+                    $retornar=true;// se retorna un valor verdadero
+                    $query->closeCursor();
+                    self::$db=null;
+
                 }else {
                     $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> EL correo no existe, usted no podra ingresar. </div>';
                 }
-            }
-         }else{
+         }
+         /* ESTO SERÍA SI SE LOGUEARAN CON EL CORREO
+         else{
                 //Se muestra al usuario el mensaje de error sobre
                 //el formato de correo
          $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> El correo que ingresaste no tiene formato correcto. </div>';
          }
+          * 
+          */
     return $retornar;
     }
 
@@ -142,60 +158,60 @@ class Login{
                     //y verificamos la contraseña
                 // $contrasenya = password_hash($contra, PASSWORD_DEFAULT);
             
-               if(parent::$datosConexion==null){
-                    parent::$datosConexion=new DatosConexion();
+               if(self::$datosConexion==null){
+                    self::$datosConexion=new DatosConexion();
                 }
-                if(parent::$db==null){
-                    parent::$db=new PDO('mysql:host='.parent::$datosConexion->host()
-                           .';port=3306;dbname='.parent::$datosConexion->dbName(),
-                           parent::$datosConexion->usuario(), parent::$datosConexion->password());
+                if(self::$db==null){
+                    self::$db=new PDO('mysql:host='.self::$datosConexion->host()
+                           .';port=3306;dbname='.self::$datosConexion->dbName(),
+                           self::$datosConexion->usuario(), self::$datosConexion->password());
+                    self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 }
 
-                if(parent::$db==null){
+                if(self::$db==null){
                     $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> Servidor de datos no econtrado, vuelva a intentar mas tarde. </div>';
                 }else{
                     //consulta SQL para vereficar si existe tal correo del
                     //usario que introdujo 
-                    $query= parent::$db->prepare("SELECT
-                                            usuarios.Email,
-                                            usuarios.Pass,
-                                            usuarios.Nombre,
-                                            usuarios.idUser
-                                            FROM
-                                            usuarios
-                                            WHERE usuarios.Email=':email';");
+                    $query= self::$db->prepare("SELECT idUser, Pass, Nombre, Apellidos, Email
+                                                FROM usuarios
+                                                WHERE User=? ;");
 
-                    $query->bindParam(':email', $this->mail);
-                    $query->setFetchNode(PDO::FETCH_ASSOC);
-
+                    $query->bindParam(1,$this->user);
+                    
+                    
+                    //$query->setFetchMode(PDO::FETCH_ASSOC);
                     $respuesta = $query->execute();
                     //Aquí determinamos con la instrucción if
                     //la consulta generada, si mayor a cero
                     //retornamos el valor verdadero
                     //por el contrario mensaje de error
+                    
                     if($respuesta){
-
-                         $row = $query->fetch();
+                         echo $query->rowCount();
+                         $row = $query->fetch(PDO::FETCH_ASSOC);
+                         
                          //Recuperacion el Hash de la BD
                          $passBD = $row['Pass'];
+                         var_dump($row);
+                          //Realizamos el comparación del paswrod con la instrucción if
+                          // if(password_verify($contra, $Hashing)){ DE MOMENTO LO HACEMOS SIN HASH PORQUE NO REGISTRAMOS
+                        
+                        if(strcmp($contra,$passBD)==0){ // Son iguales
+                             //Recuperamos el Id del usuario
+                             $this->idUser=$row['idUser'];
+                             //Recuperamos el nombre de usuario para imprimir
+                             $this->username = $this->user;
+                             $this->nombre = $row['Nombre'];
+                             $this->apellidos = $row['Apellidos'];
 
-                              //Realizamos el comparación del paswrod con la instrucción if
-                              // if(password_verify($contra, $Hashing)){ DE MOMENTO LO HACEMOS SIN HASH PORQUE NO REGISTRAMOS
-                              if($contra==$passBD){
-                                  //Recuperamos el Id del usuario
-                                  $this->idUser=$row['idUser'];
-                                  //Recuperamos el nombre de usuario para imprimir
-                                  $this->username = $row['User'];
-                                  $this->nombre = $row['Nombre'];
-                                  $this->apellidos = $row['Apellidos'];
-                                  
-                                  registrarAcceso();
-                                 
-                                  $retornar           = true;
-                               }else {
-                                  $this->Mensaje ='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> Contraseña incorrecto escriba nuevamente. </div>';
-                                  $retornar      =false; //El paswor ingresado no es correcto
-                               }
+                             $this->registrarAcceso();
+
+                             $retornar = true;
+                        }else {
+                             $this->Mensaje ='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> Contraseña incorrecto escriba nuevamente. </div>';
+                             $retornar      =false; //El paswor ingresado no es correcto
+                        }
                     }else {
                         $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> EL correo no existe, usted no podra ingresar. </div>';
                     }
@@ -207,22 +223,22 @@ class Login{
     
     private function registrarAcceso(){
         // Registramos el acceso a la página en nuestra BD.
-        $fecha = time("d/m/Y");
-        $hora = time("H:m:s");
-        if(parent::$datosConexion==null){
-                    parent::$datosConexion=new DatosConexion();
+        $fecha = date("Y-m-d");
+        $hora = date("H:i:s");
+        if(self::$datosConexion==null){
+                    self::$datosConexion=new DatosConexion();
                 }
-                if(parent::$db==null){
-                    parent::$db=new PDO('mysql:host='.parent::$datosConexion->host()
-                           .';port=3306;dbname='.parent::$datosConexion->dbName(),
-                           parent::$datosConexion->usuario(), parent::$datosConexion->password());
+                if(self::$db==null){
+                    self::$db=new PDO('mysql:host='.self::$datosConexion->host()
+                           .';port=3306;dbname='.self::$datosConexion->dbName(),
+                           self::$datosConexion->usuario(), self::$datosConexion->password());
                 }
 
-                if(parent::$db==null){
+                if(self::$db==null){
                     $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> Servidor de datos no econtrado, vuelva a intentar mas tarde. </div>';
                 }else{
-                    $query= parent::$db->prepare("INSERT INTO
-                                            usuarios (IdUser, Fecha, Hora)
+                    $query= self::$db->prepare("INSERT INTO
+                                            accesos (IdUser, Fecha, Hora)
                                             VALUES (:idUser, :fecha, :hora);");
 
                     $query->bindParam(':idUser', $this->idUser);
@@ -236,7 +252,10 @@ class Login{
                     //por el contrario mensaje de error
                     if($respuesta){
                         echo "Acceso registrado correctamente.";
+                        $_SESSION['logueado']=true;
+                        //header("insertar_datos.php");
                     }else{
+                        echo "ERROR registroAcceso()";
                         $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> EL correo no existe, usted no podra ingresar. </div>';
                     }
                 }

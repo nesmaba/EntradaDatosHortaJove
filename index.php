@@ -6,6 +6,7 @@ and open the template in the editor.
 -->
 <?php
  require_once 'Modelo/Login.php';
+ session_start();
 ?>
 <html>
     <head>
@@ -23,17 +24,18 @@ and open the template in the editor.
             <h1> L'Horta Jove </h1>
             
             <?php
+            $_SESSION['logueado']=false;
+                setlocale(LC_ALL,"es_ES");
 		 //Datos para ingresar
 		 //usuario:       nesmaba
 		 //Contraseña: 1234
                 //Se realiza la validacion de las variable globales
 		 if(!empty($_POST['user']) && !empty($_POST['pass'])){
-                    echo "holaaaa";
-                     var_dump($_POST);
+                   
                     $login=new Login($_POST['user'],$_POST['pass']);
                     $login->ingresar();
                     //Muestra el mesaje de error al usuario
-                    echo $login->mostrarMsg();
+                    //echo $login->mostrarMsg();
 		 }
             ?>
             

@@ -6,15 +6,22 @@
  * campos.
  */
 class DatosConexion {
-	private $host="localhost";
-	private $usuario="root";
-	private $password="";
-	private $dbName="horta_jove";
+	private $host;
+	private $usuario;
+	private $password;
+	private $dbName;
 	/**
 	 * Devuelve el nombre de host
 	 * @return [type] [string]
 	 */
          
+        function __construct(){
+            $this->host="localhost";
+            $this->usuario="root";
+            $this->password="";
+            $this->dbName="horta_jove";   
+        }
+        
 	public function host(){
 		return $this->host;
 	}
