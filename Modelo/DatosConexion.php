@@ -19,7 +19,7 @@ class DatosConexion {
             $this->host="localhost";
             $this->usuario="root";
             $this->password="";
-            $this->dbName="horta_jove";   
+            $this->dbName="Horta_Jove";   
         }
         
 	public function host(){

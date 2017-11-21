@@ -39,14 +39,14 @@ and open the template in the editor.
                                     <input type="time" name="tiempo" value="" size="45"><br>
                                     <h4>Datos del riego</h4>
                                     <p style="margin-left: 15px; margin-bottom: 2px;font-size:14px;"><strong>Parcela: </strong>
-                                        <select name="OS">
+                                        <select name="parcela">
                                             <option value="1">Parcela nº 1</option> 
                                             <option value="2">Parcela nº 2</option> 
                                             <option value="3">Parcela nº 3</option>
                                         </select>
                                     </p><br>
-                                    <p style="margin-left: 15px;margin-top: 2px;font-size:14px;"><strong>Caballón: </strong>
-                                        <select name="OS">
+                                    <p style="margin-left: 15px;margin-top: 2px;margin-bottom: 2px;font-size:14px;"><strong>Caballón: </strong>
+                                        <select name="caballon">
                                             <option value="1">Caballón nº 1</option> 
                                             <option value="2">Caballón nº 2</option> 
                                             <option value="3">Caballón nº 3</option> 
@@ -61,6 +61,14 @@ and open the template in the editor.
                                             <option value="12">Caballón nº 12</option>
                                         </select>
                                     </p><br>
+                                    <p style="margin-left: 15px; margin-top: 2px;font-size:14px;"><strong>¿Hay malas hierbas? </strong>
+                                        <select name="malasHierbas">
+                                            <option value="1">Nada</option> 
+                                            <option value="2">Pocas</option> 
+                                            <option value="3">Muchas</option>
+                                        </select>
+                                    </p><br>
+                                    
                                     <span class="wpcf7-form-control-wrap textarea-398"><textarea name="textarea-398" cols="40" rows="10" class="wpcf7-form-control wpcf7-textarea" placeholder="Special notes, concerns, or requirements"></textarea></span>
                                 </div>
                                 <div style="width: 48%; float: right;">

@@ -238,7 +238,7 @@ class Login{
                     $this->mensaje='<div class="alert alert-danger alert-dismissible fade in" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button> <strong> Error!</strong> Servidor de datos no econtrado, vuelva a intentar mas tarde. </div>';
                 }else{
                     $query= self::$db->prepare("INSERT INTO
-                                            accesos (IdUser, Fecha, Hora)
+                                            Accesos (IdUser, Fecha, Hora)
                                             VALUES (:idUser, :fecha, :hora);");
 
                     $query->bindParam(':idUser', $this->idUser);
